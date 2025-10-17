@@ -1,0 +1,120 @@
+Create ZooKeeper config files:
+
+mkdir -p /tmp/zookeeper1 /tmp/zookeeper2 /tmp/zookeeper3
+cd /opt/kafka_2.13-3.3.1/config
+
+
+Running a zoo keeper:
+sudo bin/zookeeper-server-start.sh config/zookeeper.properties
+
+Running kakfa server:
+sudo bin/kafka-server-start.sh config/server.properties
+
+
+createing new files for zookeeper config inside config folder: 
+
+sudo bash -c 'cat <<EOF > zookeeper1.properties
+# Data directory
+dataDir=/tmp/zookeeper1
+
+# Client port for connections (Kafka brokers or CLI)
+clientPort=2181
+
+# Tick time
+tickTime=2000
+initLimit=10
+syncLimit=5
+
+# Ensemble servers
+server.1=localhost:2888:3888
+server.2=localhost:2889:3889
+server.3=localhost:2890:3890
+EOF'
+
+sudo bash -c 'cat <<EOF > zookeeper2.properties
+# Data directory
+dataDir=/tmp/zookeeper2
+
+# Client port for connections (Kafka brokers or CLI)
+clientPort=2182
+
+# Tick time
+tickTime=2000
+initLimit=10
+syncLimit=5
+
+# Ensemble servers
+server.1=localhost:2888:3888
+server.2=localhost:2889:3889
+server.3=localhost:2890:3890
+EOF'
+
+sudo bash -c 'cat <<EOF > zookeeper3.properties
+# Data directory
+dataDir=/tmp/zookeeper3
+
+# Client port for connections (Kafka brokers or CLI)
+clientPort=2183
+
+# Tick time
+tickTime=2000
+initLimit=10
+syncLimit=5
+
+# Ensemble servers
+server.1=localhost:2888:3888
+server.2=localhost:2889:3889
+server.3=localhost:2890:3890
+EOF'
+
+
+assigning id's to zookeeprr:
+echo 1 > /tmp/zookeeper1/myid
+echo 2 > /tmp/zookeeper2/myid
+echo 3 > /tmp/zookeeper3/myid
+
+starting zookeeper nodes:
+bin/zookeeper-server-start.sh config/zookeeper1.properties
+bin/zookeeper-server-start.sh config/zookeeper2.properties
+bin/zookeeper-server-start.sh config/zookeeper3.properties
+
+creating folders for kafka broker logs:
+mkdir -p /tmp/kafka-logs-1 /tmp/kafka-logs-2 /tmp/kafka-logs-3
+
+
+Kafka server properties inside config folder:
+
+sudo bash -c 'cat <<EOF > server-1.properties
+broker.id=1
+listeners=PLAINTEXT://localhost:9092
+log.dirs=/tmp/kafka-logs-1
+zookeeper.connect=localhost:2181,localhost:2182,localhost:2183
+EOF'
+
+sudo bash -c 'cat <<EOF > server-2.properties
+broker.id=2
+listeners=PLAINTEXT://localhost:9093
+log.dirs=/tmp/kafka-logs-2
+zookeeper.connect=localhost:2181,localhost:2182,localhost:2183
+EOF'
+
+sudo bash -c 'cat <<EOF > server-3.properties
+broker.id=3
+listeners=PLAINTEXT://localhost:9094
+log.dirs=/tmp/kafka-logs-3
+zookeeper.connect=localhost:2181,localhost:2182,localhost:2183
+EOF'
+
+bin/kafka-server-start.sh config/server-1.properties
+bin/kafka-server-start.sh config/server-2.properties
+bin/kafka-server-start.sh config/server-3.properties
+
+create topic:
+
+bin/kafka-topics.sh -create --bootstrap-server localhost:9092 --replication-factor 3 --partitions 3 --topic order-events
+
+
+
+
+
+
